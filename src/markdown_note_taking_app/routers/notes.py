@@ -127,6 +127,29 @@ def get_note(
         ) from exc
 
 
+@router.delete(
+    "/notes/{filename}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Delete a markdown note",
+)
+def delete_note(
+    filename: str,
+    storage: Annotated[StorageService, Depends(get_storage_service)],
+) -> None:
+    try:
+        storage.delete_note(filename)
+    except FileNotFoundError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        ) from exc
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        ) from exc
+
+
 @router.get(
     "/notes/{filename}/render",
     response_model=None,

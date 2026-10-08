@@ -70,3 +70,15 @@ def test_note_exists(tmp_path: Path) -> None:
     service.save_note("test.md", "hello")
     assert service.note_exists("test.md")
     assert not service.note_exists("../bad.md")
+
+
+def test_delete_note(tmp_path: Path) -> None:
+    service = StorageService(tmp_path)
+    service.save_note("to_delete.md", "bye")
+    assert service.note_exists("to_delete.md")
+
+    service.delete_note("to_delete.md")
+    assert not service.note_exists("to_delete.md")
+
+    with pytest.raises(FileNotFoundError):
+        service.delete_note("to_delete.md")

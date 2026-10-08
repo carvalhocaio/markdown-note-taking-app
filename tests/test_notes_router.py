@@ -165,3 +165,16 @@ def test_check_saved_note_grammar(client: TestClient) -> None:
 def test_check_saved_note_grammar_missing_note(client: TestClient) -> None:
     response = client.post("/notes/missing.md/grammar-check")
     assert response.status_code == 404
+
+
+def test_delete_note(client: TestClient) -> None:
+    client.post("/notes", json={"filename": "deleteme.md", "content": "Sample"})
+
+    del_resp = client.delete("/notes/deleteme.md")
+    assert del_resp.status_code == 204
+
+    get_resp = client.get("/notes/deleteme.md")
+    assert get_resp.status_code == 404
+
+    del_again = client.delete("/notes/deleteme.md")
+    assert del_again.status_code == 404

@@ -87,3 +87,9 @@ class StorageService:
             return target_path.is_file()
         except ValueError:
             return False
+
+    def delete_note(self, filename: str) -> None:
+        sanitized_name, target_path = self._sanitize_and_resolve(filename)
+        if not target_path.is_file():
+            raise FileNotFoundError(f"Note '{sanitized_name}' not found")
+        target_path.unlink()

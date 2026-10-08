@@ -78,7 +78,13 @@ curl http://127.0.0.1:8000/notes
 curl http://127.0.0.1:8000/notes/my-note.md
 ```
 
-### 5. Render Note in HTML
+### 5. Delete Note
+
+```bash
+curl -X DELETE http://127.0.0.1:8000/notes/my-note.md
+```
+
+### 6. Render Note in HTML
 
 - **View in browser (HTML):**
   ```bash
@@ -89,7 +95,7 @@ curl http://127.0.0.1:8000/notes/my-note.md
   curl http://127.0.0.1:8000/notes/my-note.md/render?format=json
   ```
 
-### 6. Grammar Checking
+### 7. Grammar Checking
 
 - **Check arbitrary text:**
   ```bash
