@@ -465,25 +465,54 @@
           </div>
         </div>
       </div>
-
-      <!-- Grammar Results Floating Sheet/Banner -->
-      <div id="grammarPanel" class="hidden border-t border-border bg-card p-3 sm:p-4 max-h-64 sm:max-h-72 overflow-y-auto shadow-md">
-        <div class="flex items-center justify-between pb-2 mb-2 border-b border-border">
-          <div class="flex items-center gap-2">
-            <i data-lucide="alert-circle" class="w-4 h-4 text-sky-400"></i>
-            <span id="grammarSummary" class="text-xs font-semibold">Grammar & Spelling Analysis</span>
-          </div>
-          <button
-            onclick="closeGrammarPanel()"
-            class="h-6 w-6 rounded-md hover:bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground text-xs"
-            title="Close analysis"
-          >
-            ✕
-          </button>
-        </div>
-        <div id="grammarIssuesList" class="space-y-3"></div>
-      </div>
     </main>
+  </div>
+
+  <!-- Fixed Floating Grammar Assistant (Always in front of the screen, no scrolling needed) -->
+  <div
+    id="grammarPanel"
+    class="hidden fixed bottom-4 right-4 left-4 sm:left-auto sm:w-[560px] md:w-[640px] z-50 max-h-[75vh] flex flex-col rounded-xl border border-border bg-card/95 backdrop-blur-md shadow-2xl transition-all duration-200 animate-in slide-in-from-bottom-4"
+  >
+    <!-- Sheet Header -->
+    <div
+      class="px-3.5 py-2.5 bg-muted/50 border-b border-border flex items-center justify-between shrink-0 cursor-pointer select-none"
+      onclick="toggleGrammarCollapse()"
+    >
+      <div class="flex items-center gap-2 min-w-0">
+        <div class="h-6 w-6 rounded-md bg-sky-500/10 border border-sky-500/30 flex items-center justify-center text-primary shrink-0">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+        </div>
+        <span id="grammarSummary" class="text-xs font-semibold text-foreground truncate">Grammar & Spelling Analysis</span>
+      </div>
+
+      <div class="flex items-center gap-1 shrink-0" onclick="event.stopPropagation()">
+        <!-- Minimize / Expand -->
+        <button
+          type="button"
+          onclick="toggleGrammarCollapse()"
+          class="h-6 px-2 rounded hover:bg-muted text-muted-foreground hover:text-foreground text-[11px] font-medium transition-colors inline-flex items-center gap-1"
+          title="Minimize / Expand"
+        >
+          <i id="grammarCollapseIcon" data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+          <span id="grammarCollapseText" class="hidden sm:inline">Minimize</span>
+        </button>
+
+        <!-- Close -->
+        <button
+          type="button"
+          onclick="closeGrammarPanel()"
+          class="h-6 w-6 rounded hover:bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground text-xs transition-colors"
+          title="Close analysis panel"
+        >
+          ✕
+        </button>
+      </div>
+    </div>
+
+    <!-- Issues List Body -->
+    <div id="grammarIssuesBody" class="p-3 sm:p-4 overflow-y-auto max-h-[60vh] space-y-3">
+      <div id="grammarIssuesList" class="space-y-3"></div>
+    </div>
   </div>
 
   <!-- Upload Modal Dialog -->
@@ -747,6 +776,10 @@
         onEditorInput();
         renderNotesList(allNotes);
         closeGrammarPanel();
+        const btn = document.getElementById('btnCheckGrammar');
+        if (btn) {
+          btn.innerHTML = `<i data-lucide="spell-check" class="w-3.5 h-3.5 text-primary"></i><span class="hidden sm:inline">Check Grammar</span><span class="sm:hidden">Check</span>`;
+        }
         showToast(`Note "${filename}" loaded`, 'info');
       } catch (err) {
         showToast(err.message, 'error');
@@ -761,6 +794,10 @@
       onEditorInput();
       renderNotesList(allNotes);
       closeGrammarPanel();
+      const btn = document.getElementById('btnCheckGrammar');
+      if (btn) {
+        btn.innerHTML = `<i data-lucide="spell-check" class="w-3.5 h-3.5 text-primary"></i><span class="hidden sm:inline">Check Grammar</span><span class="sm:hidden">Check</span>`;
+      }
       if (window.innerWidth < 1024) {
         closeSidebar();
         setViewMode('editor');
@@ -852,6 +889,26 @@
       window.open(`/notes/${encodeURIComponent(filename)}/render`, '_blank');
     }
 
+    let isGrammarCollapsed = false;
+
+    function toggleGrammarCollapse() {
+      const body = document.getElementById('grammarIssuesBody');
+      const icon = document.getElementById('grammarCollapseIcon');
+      const text = document.getElementById('grammarCollapseText');
+      isGrammarCollapsed = !isGrammarCollapsed;
+
+      if (isGrammarCollapsed) {
+        body?.classList.add('hidden');
+        icon?.setAttribute('data-lucide', 'chevron-up');
+        if (text) text.innerText = 'Expand';
+      } else {
+        body?.classList.remove('hidden');
+        icon?.setAttribute('data-lucide', 'chevron-down');
+        if (text) text.innerText = 'Minimize';
+      }
+      lucide.createIcons();
+    }
+
     // Grammar Checking
     async function checkGrammar() {
       const content = document.getElementById('markdownEditor').value;
@@ -879,10 +936,10 @@
         displayGrammarResults(data);
       } catch (err) {
         showToast(`Grammar check error: ${err.message}`, 'error');
-      } finally {
-        btn.disabled = false;
         btn.innerHTML = `<i data-lucide="spell-check" class="w-3.5 h-3.5 text-primary"></i><span class="hidden sm:inline">Check Grammar</span><span class="sm:hidden">Check</span>`;
         lucide.createIcons();
+      } finally {
+        btn.disabled = false;
       }
     }
 
@@ -917,17 +974,33 @@
       const summary = document.getElementById('grammarSummary');
       const editor = document.getElementById('markdownEditor');
       const content = editor.value;
+      const btn = document.getElementById('btnCheckGrammar');
+
+      // Expand panel when new analysis results are shown
+      isGrammarCollapsed = false;
+      document.getElementById('grammarIssuesBody')?.classList.remove('hidden');
+      document.getElementById('grammarCollapseIcon')?.setAttribute('data-lucide', 'chevron-down');
+      const collapseText = document.getElementById('grammarCollapseText');
+      if (collapseText) collapseText.innerText = 'Minimize';
 
       list.innerHTML = '';
       panel.classList.remove('hidden');
 
       if (data.issue_count === 0) {
         summary.innerHTML = `<span class="text-sky-400 font-medium">No grammar or spelling issues found!</span>`;
-        list.innerHTML = `<div class="text-xs text-muted-foreground">The text follows ${data.language} rules cleanly.</div>`;
+        list.innerHTML = `<div class="text-xs text-muted-foreground p-1">The text follows ${data.language} rules cleanly without errors.</div>`;
+        if (btn) {
+          btn.innerHTML = `<i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-400"></i><span class="text-emerald-400 font-medium">Clean</span>`;
+        }
+        lucide.createIcons();
         return;
       }
 
       summary.innerText = `${data.issue_count} issue(s) detected (${data.language}):`;
+
+      if (btn) {
+        btn.innerHTML = `<i data-lucide="spell-check" class="w-3.5 h-3.5 text-primary"></i><span class="hidden sm:inline">Grammar</span><span class="inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground font-bold text-[10px] h-4 min-w-4 px-1 ml-0.5">${data.issue_count}</span>`;
+      }
 
       data.issues.forEach(issue => {
         const card = document.createElement('div');
@@ -993,7 +1066,7 @@
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2.5 rounded-md bg-muted/40 border border-border">
             <div class="flex items-center gap-2 font-mono text-xs">
               <span class="text-[10px] uppercase tracking-wider text-muted-foreground font-sans font-medium">Flagged word:</span>
-              <span class="line-through text-destructive bg-destructive/15 px-2 py-0.5 rounded border border-destructive/25 font-semibold">
+              <span class="line-through text-destructive bg-destructive/15 px-2 py-0.5 rounded border border-destructive/25 font-semibold break-all">
                 ${escapeHtml(flaggedWord)}
               </span>
             </div>
@@ -1001,7 +1074,7 @@
           </div>
 
           <!-- Surrounding Context Snippet -->
-          <div class="text-[11px] font-mono text-muted-foreground bg-muted/20 px-2.5 py-1.5 rounded border border-border/40">
+          <div class="text-[11px] font-mono text-muted-foreground bg-muted/20 px-2.5 py-1.5 rounded border border-border/40 break-words">
             <span class="text-[10px] uppercase tracking-wider font-sans font-medium text-muted-foreground mr-1">Context:</span>
             "...${escapeHtml(ctxBefore)}<mark class="bg-primary/20 text-sky-400 font-bold px-1.5 py-0.5 rounded border border-primary/40">${escapeHtml(ctxTarget)}</mark>${escapeHtml(ctxAfter)}..."
           </div>
