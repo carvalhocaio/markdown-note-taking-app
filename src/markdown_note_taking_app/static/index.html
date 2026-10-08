@@ -211,44 +211,56 @@
 
   <!-- Header / Navigation Bar -->
   <header class="sticky top-0 z-40 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-    <div class="flex h-14 items-center justify-between px-4 sm:px-6">
-      <!-- Brand & Title -->
-      <div class="flex items-center gap-3">
+    <div class="flex h-14 items-center justify-between px-3 sm:px-6">
+      <!-- Left: Mobile Menu Button & Brand -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <!-- Sidebar Toggle on Mobile/Tablet -->
+        <button
+          id="mobileMenuBtn"
+          onclick="toggleSidebar()"
+          class="lg:hidden inline-flex items-center justify-center rounded-md border border-input bg-card h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted"
+          title="Toggle Notes List"
+        >
+          <i data-lucide="menu" class="w-4 h-4"></i>
+        </button>
+
         <div class="flex items-center gap-2 font-semibold tracking-tight text-foreground">
-          <div class="h-7 w-7 rounded-md bg-primary text-primary-foreground flex items-center justify-center font-bold text-xs shadow-sm shadow-primary/20">
+          <div class="h-7 w-7 rounded-md bg-primary text-primary-foreground flex items-center justify-center font-bold text-xs shadow-sm shadow-primary/20 shrink-0">
             MD
           </div>
-          <span class="text-sm font-semibold">Markdown Notes</span>
+          <span class="text-sm font-semibold truncate">Markdown Notes</span>
         </div>
-        <span class="hidden sm:inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary">
+        <span class="hidden md:inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary">
           shadcn · sky
         </span>
       </div>
 
-      <!-- Actions -->
-      <div class="flex items-center gap-2">
-        <!-- New Note -->
+      <!-- Right: Action Buttons -->
+      <div class="flex items-center gap-1.5 sm:gap-2">
+        <!-- New Note Button -->
         <button
           onclick="createNewNote()"
-          class="inline-flex items-center justify-center gap-1.5 rounded-md text-xs font-medium transition-colors bg-primary text-primary-foreground shadow-sm shadow-primary/25 hover:bg-primary/90 h-8 px-3"
+          class="inline-flex items-center justify-center gap-1.5 rounded-md text-xs font-medium transition-colors bg-primary text-primary-foreground shadow-sm shadow-primary/25 hover:bg-primary/90 h-8 px-2.5 sm:px-3"
+          title="Create a new note"
         >
           <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-          <span>New Note</span>
+          <span class="hidden sm:inline">New Note</span>
         </button>
 
-        <!-- Upload File -->
+        <!-- Upload File Button -->
         <button
           onclick="openUploadDialog()"
-          class="inline-flex items-center justify-center gap-1.5 rounded-md text-xs font-medium transition-colors border border-input bg-card shadow-sm hover:bg-muted hover:border-primary/40 h-8 px-3"
+          class="inline-flex items-center justify-center gap-1.5 rounded-md text-xs font-medium transition-colors border border-input bg-card shadow-sm hover:bg-muted hover:border-primary/40 h-8 px-2.5 sm:px-3"
+          title="Upload a .md file"
         >
           <i data-lucide="upload" class="w-3.5 h-3.5 text-primary"></i>
-          <span class="hidden sm:inline">Upload .md</span>
+          <span class="hidden md:inline">Upload .md</span>
         </button>
 
         <!-- Theme Toggle -->
         <button
           onclick="toggleTheme()"
-          class="inline-flex items-center justify-center rounded-md text-xs font-medium transition-colors border border-input bg-card shadow-sm hover:bg-muted h-8 w-8"
+          class="inline-flex items-center justify-center rounded-md text-xs font-medium transition-colors border border-input bg-card shadow-sm hover:bg-muted h-8 w-8 shrink-0"
           title="Toggle Theme (Light / Dark)"
         >
           <i id="themeIcon" data-lucide="moon" class="w-4 h-4"></i>
@@ -258,7 +270,7 @@
         <a
           href="/docs"
           target="_blank"
-          class="inline-flex items-center justify-center rounded-md text-xs font-medium transition-colors border border-input bg-card shadow-sm hover:bg-muted h-8 w-8"
+          class="inline-flex items-center justify-center rounded-md text-xs font-medium transition-colors border border-input bg-card shadow-sm hover:bg-muted h-8 w-8 shrink-0"
           title="API Documentation (Swagger UI)"
         >
           <i data-lucide="book-open" class="w-4 h-4 text-muted-foreground"></i>
@@ -267,10 +279,36 @@
     </div>
   </header>
 
-  <!-- Main Layout -->
-  <div class="flex-1 flex overflow-hidden">
-    <!-- Sidebar: Notes Explorer -->
-    <aside class="w-72 sm:w-80 border-r border-border bg-card flex flex-col shrink-0">
+  <!-- Main Container -->
+  <div class="flex-1 flex overflow-hidden relative">
+
+    <!-- Mobile Sidebar Backdrop Overlay -->
+    <div
+      id="sidebarBackdrop"
+      onclick="closeSidebar()"
+      class="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm hidden lg:hidden transition-opacity"
+    ></div>
+
+    <!-- Sidebar: Notes Explorer (Static on lg+, Drawer on < lg) -->
+    <aside
+      id="sidebarAside"
+      class="fixed inset-y-0 left-0 z-50 w-72 sm:w-80 border-r border-border bg-card flex flex-col shrink-0 shadow-2xl transition-transform duration-200 -translate-x-full lg:translate-x-0 lg:static lg:z-auto lg:shadow-none"
+    >
+      <!-- Sidebar Mobile Header (visible only on mobile/tablet) -->
+      <div class="p-3 border-b border-border flex items-center justify-between lg:hidden">
+        <div class="flex items-center gap-2">
+          <i data-lucide="folder" class="w-4 h-4 text-primary"></i>
+          <span class="text-xs font-semibold uppercase tracking-wider text-foreground">Saved Notes</span>
+        </div>
+        <button
+          onclick="closeSidebar()"
+          class="h-7 w-7 rounded-md hover:bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground text-xs"
+          title="Close sidebar"
+        >
+          ✕
+        </button>
+      </div>
+
       <!-- Search Bar -->
       <div class="p-3 border-b border-border flex items-center gap-2">
         <div class="relative flex-1">
@@ -285,7 +323,7 @@
         </div>
         <button
           onclick="fetchNotes()"
-          class="inline-flex items-center justify-center rounded-md border border-input bg-background h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+          class="inline-flex items-center justify-center rounded-md border border-input bg-background h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shrink-0"
           title="Refresh notes list"
         >
           <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i>
@@ -314,9 +352,9 @@
     <!-- Main Workspace -->
     <main class="flex-1 flex flex-col min-w-0 bg-background overflow-hidden">
       <!-- Workspace Toolbar -->
-      <div class="h-12 border-b border-border bg-card px-4 flex items-center justify-between gap-3">
+      <div class="min-h-12 border-b border-border bg-card px-3 sm:px-4 py-2 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
         <!-- Filename Input -->
-        <div class="flex items-center gap-2 flex-1 max-w-md">
+        <div class="flex items-center gap-2 flex-1 min-w-0">
           <i data-lucide="file" class="w-4 h-4 text-primary shrink-0"></i>
           <input
             id="noteFilename"
@@ -327,15 +365,16 @@
         </div>
 
         <!-- Action Buttons -->
-        <div class="flex items-center gap-2">
+        <div class="flex items-center justify-end gap-1.5 sm:gap-2 shrink-0">
           <!-- Check Grammar -->
           <button
             id="btnCheckGrammar"
             onclick="checkGrammar()"
-            class="inline-flex items-center justify-center gap-1.5 rounded-md text-xs font-medium transition-colors border border-input bg-background shadow-sm hover:bg-muted hover:border-primary/50 hover:text-primary h-8 px-3"
+            class="inline-flex items-center justify-center gap-1.5 rounded-md text-xs font-medium transition-colors border border-input bg-background shadow-sm hover:bg-muted hover:border-primary/50 hover:text-primary h-8 px-2.5 sm:px-3"
           >
             <i data-lucide="spell-check" class="w-3.5 h-3.5 text-primary"></i>
-            <span>Check Grammar</span>
+            <span class="hidden sm:inline">Check Grammar</span>
+            <span class="sm:hidden">Check</span>
           </button>
 
           <!-- Save Note -->
@@ -344,14 +383,14 @@
             class="inline-flex items-center justify-center gap-1.5 rounded-md text-xs font-medium transition-colors bg-primary text-primary-foreground shadow-sm shadow-primary/25 hover:bg-primary/90 h-8 px-3"
           >
             <i data-lucide="save" class="w-3.5 h-3.5"></i>
-            <span>Save Note</span>
+            <span>Save</span>
           </button>
 
           <!-- Open Server Rendered HTML in New Tab -->
           <button
             id="btnOpenHtml"
             onclick="openRenderedHtml()"
-            class="inline-flex items-center justify-center rounded-md border border-input bg-background h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+            class="inline-flex items-center justify-center rounded-md border border-input bg-background h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shrink-0"
             title="Open rendered HTML page (/render)"
           >
             <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
@@ -359,11 +398,45 @@
         </div>
       </div>
 
+      <!-- Mobile/Tablet View Switcher Bar (visible on < lg) -->
+      <div class="lg:hidden flex items-center justify-between px-3 py-1.5 border-b border-border bg-muted/20">
+        <div class="inline-flex h-7 items-center rounded-md bg-muted p-0.5 text-[11px] text-muted-foreground">
+          <button
+            id="tabEditorBtn"
+            onclick="setViewMode('editor')"
+            class="rounded px-2.5 py-1 font-medium transition-all bg-card text-foreground shadow-sm"
+          >
+            Editor
+          </button>
+          <button
+            id="tabPreviewBtn"
+            onclick="setViewMode('preview')"
+            class="rounded px-2.5 py-1 font-medium transition-all text-muted-foreground hover:text-foreground"
+          >
+            Preview
+          </button>
+          <button
+            id="tabSplitBtn"
+            onclick="setViewMode('split')"
+            class="rounded px-2.5 py-1 font-medium transition-all text-muted-foreground hover:text-foreground hidden sm:inline-block"
+          >
+            Split
+          </button>
+        </div>
+
+        <span id="mobileStatsLabel" class="text-[10px] text-muted-foreground font-mono">
+          0 chars
+        </span>
+      </div>
+
       <!-- Split View Editor & Preview -->
-      <div class="flex-1 flex flex-col lg:flex-row overflow-hidden">
-        <!-- Markdown Editor -->
-        <div class="flex-1 flex flex-col border-b lg:border-b-0 lg:border-r border-border bg-card">
-          <div class="h-8 px-4 border-b border-border bg-muted/20 flex items-center justify-between text-[11px] font-medium text-muted-foreground">
+      <div id="workspaceSplit" class="flex-1 flex flex-col lg:flex-row overflow-hidden">
+        <!-- Markdown Editor Panel -->
+        <div
+          id="editorPanel"
+          class="flex-1 flex flex-col border-b lg:border-b-0 lg:border-r border-border bg-card overflow-hidden"
+        >
+          <div class="h-8 px-4 border-b border-border bg-muted/20 hidden lg:flex items-center justify-between text-[11px] font-medium text-muted-foreground">
             <span class="uppercase tracking-wider">Editor</span>
             <span id="statsLabel">0 characters · 0 words</span>
           </div>
@@ -376,22 +449,25 @@
           ></textarea>
         </div>
 
-        <!-- Rendered HTML Preview -->
-        <div class="flex-1 flex flex-col bg-background overflow-hidden">
-          <div class="h-8 px-4 border-b border-border bg-muted/20 flex items-center justify-between text-[11px] font-medium text-muted-foreground">
+        <!-- Rendered HTML Preview Panel -->
+        <div
+          id="previewPanel"
+          class="flex-1 flex flex-col bg-background overflow-hidden"
+        >
+          <div class="h-8 px-4 border-b border-border bg-muted/20 hidden lg:flex items-center justify-between text-[11px] font-medium text-muted-foreground">
             <span class="uppercase tracking-wider">Rendered Preview</span>
             <span class="inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
               HTML
             </span>
           </div>
-          <div id="previewContainer" class="flex-1 p-6 overflow-y-auto prose-shadcn">
+          <div id="previewContainer" class="flex-1 p-4 sm:p-6 overflow-y-auto prose-shadcn">
             <div class="text-xs text-muted-foreground italic">Rendered preview will appear here...</div>
           </div>
         </div>
       </div>
 
       <!-- Grammar Results Floating Sheet/Banner -->
-      <div id="grammarPanel" class="hidden border-t border-border bg-card p-4 max-h-64 overflow-y-auto shadow-md">
+      <div id="grammarPanel" class="hidden border-t border-border bg-card p-3 sm:p-4 max-h-64 sm:max-h-72 overflow-y-auto shadow-md">
         <div class="flex items-center justify-between pb-2 mb-2 border-b border-border">
           <div class="flex items-center gap-2">
             <i data-lucide="alert-circle" class="w-4 h-4 text-sky-400"></i>
@@ -400,6 +476,7 @@
           <button
             onclick="closeGrammarPanel()"
             class="h-6 w-6 rounded-md hover:bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground text-xs"
+            title="Close analysis"
           >
             ✕
           </button>
@@ -411,7 +488,7 @@
 
   <!-- Upload Modal Dialog -->
   <div id="uploadDialog" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-    <div class="w-full max-w-md rounded-lg border border-border bg-card p-6 shadow-xl animate-in fade-in zoom-in-95 duration-150">
+    <div class="w-full max-w-md rounded-lg border border-border bg-card p-5 sm:p-6 shadow-xl animate-in fade-in zoom-in-95 duration-150">
       <div class="flex items-center justify-between mb-4">
         <h3 class="text-sm font-semibold tracking-tight text-foreground flex items-center gap-2">
           <i data-lucide="upload" class="w-4 h-4 text-primary"></i>
@@ -451,12 +528,89 @@
     </div>
   </div>
 
-  <!-- Sonner-style Toast Container -->
-  <div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-sm"></div>
+  <!-- Sonner-style Toast Container (Responsive) -->
+  <div id="toastContainer" class="fixed bottom-4 right-4 left-4 sm:left-auto sm:max-w-sm z-50 flex flex-col gap-2 pointer-events-none"></div>
 
   <script>
     let allNotes = [];
     let activeNote = null;
+    let currentMobileView = 'editor'; // 'editor' | 'preview' | 'split'
+
+    // Responsive Mobile Sidebar Drawer Toggle
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebarAside');
+      const backdrop = document.getElementById('sidebarBackdrop');
+      const isClosed = sidebar.classList.contains('-translate-x-full');
+
+      if (isClosed) {
+        openSidebar();
+      } else {
+        closeSidebar();
+      }
+    }
+
+    function openSidebar() {
+      const sidebar = document.getElementById('sidebarAside');
+      const backdrop = document.getElementById('sidebarBackdrop');
+      sidebar.classList.remove('-translate-x-full');
+      backdrop.classList.remove('hidden');
+    }
+
+    function closeSidebar() {
+      const sidebar = document.getElementById('sidebarAside');
+      const backdrop = document.getElementById('sidebarBackdrop');
+      sidebar.classList.add('-translate-x-full');
+      backdrop.classList.add('hidden');
+    }
+
+    // Mobile/Tablet View Switcher
+    function setViewMode(mode) {
+      currentMobileView = mode;
+      const editorPanel = document.getElementById('editorPanel');
+      const previewPanel = document.getElementById('previewPanel');
+
+      const btnEditor = document.getElementById('tabEditorBtn');
+      const btnPreview = document.getElementById('tabPreviewBtn');
+      const btnSplit = document.getElementById('tabSplitBtn');
+
+      const activeClasses = ['bg-card', 'text-foreground', 'shadow-sm'];
+      const inactiveClasses = ['text-muted-foreground', 'hover:text-foreground'];
+
+      [btnEditor, btnPreview, btnSplit].forEach(btn => {
+        if (!btn) return;
+        btn.classList.remove(...activeClasses);
+        btn.classList.add(...inactiveClasses);
+      });
+
+      if (mode === 'editor') {
+        btnEditor?.classList.add(...activeClasses);
+        btnEditor?.classList.remove(...inactiveClasses);
+        editorPanel.classList.remove('hidden');
+        previewPanel.classList.add('hidden');
+      } else if (mode === 'preview') {
+        btnPreview?.classList.add(...activeClasses);
+        btnPreview?.classList.remove(...inactiveClasses);
+        editorPanel.classList.add('hidden');
+        previewPanel.classList.remove('hidden');
+      } else {
+        btnSplit?.classList.add(...activeClasses);
+        btnSplit?.classList.remove(...inactiveClasses);
+        editorPanel.classList.remove('hidden');
+        previewPanel.classList.remove('hidden');
+      }
+    }
+
+    // Handle screen resize to reset mobile view overrides when scaling to desktop
+    function handleResize() {
+      if (window.innerWidth >= 1024) {
+        document.getElementById('editorPanel')?.classList.remove('hidden');
+        document.getElementById('previewPanel')?.classList.remove('hidden');
+        closeSidebar();
+      } else {
+        setViewMode(currentMobileView);
+      }
+    }
+    window.addEventListener('resize', handleResize);
 
     // Theme Management (Dark / Light)
     function setTheme(theme) {
@@ -485,7 +639,7 @@
       const isError = type === 'error';
       const isSuccess = type === 'success';
 
-      toast.className = `flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2.5 text-xs shadow-md transition-all duration-200 ${
+      toast.className = `pointer-events-auto flex items-center gap-2 rounded-lg border border-border bg-card px-3.5 py-2.5 text-xs shadow-md transition-all duration-200 ${
         isError ? 'text-destructive border-destructive/30' : isSuccess ? 'text-sky-400 border-primary/30' : 'text-foreground'
       }`;
 
@@ -550,7 +704,13 @@
           month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
         });
 
-        item.onclick = () => loadNote(note.filename);
+        item.onclick = () => {
+          loadNote(note.filename);
+          if (window.innerWidth < 1024) {
+            closeSidebar();
+          }
+        };
+
         item.innerHTML = `
           <div class="flex items-center justify-between mb-1">
             <span class="truncate font-mono font-medium max-w-[170px] ${isActive ? 'text-primary' : ''}" title="${note.filename}">
@@ -601,6 +761,10 @@
       onEditorInput();
       renderNotesList(allNotes);
       closeGrammarPanel();
+      if (window.innerWidth < 1024) {
+        closeSidebar();
+        setViewMode('editor');
+      }
       document.getElementById('markdownEditor').focus();
     }
 
@@ -675,6 +839,7 @@
       const charCount = content.length;
       const wordCount = content.trim() ? content.trim().split(/\s+/).length : 0;
       document.getElementById('statsLabel').innerText = `${charCount} characters · ${wordCount} words`;
+      document.getElementById('mobileStatsLabel').innerText = `${charCount} chars · ${wordCount} words`;
     }
 
     // Open Rendered HTML in New Tab
@@ -697,7 +862,7 @@
 
       const btn = document.getElementById('btnCheckGrammar');
       btn.disabled = true;
-      btn.innerHTML = `<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i><span>Checking...</span>`;
+      btn.innerHTML = `<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i><span class="hidden sm:inline">Checking...</span>`;
       lucide.createIcons();
 
       try {
@@ -716,7 +881,7 @@
         showToast(`Grammar check error: ${err.message}`, 'error');
       } finally {
         btn.disabled = false;
-        btn.innerHTML = `<i data-lucide="spell-check" class="w-3.5 h-3.5 text-primary"></i><span>Check Grammar</span>`;
+        btn.innerHTML = `<i data-lucide="spell-check" class="w-3.5 h-3.5 text-primary"></i><span class="hidden sm:inline">Check Grammar</span><span class="sm:hidden">Check</span>`;
         lucide.createIcons();
       }
     }
@@ -732,6 +897,9 @@
     }
 
     function locateInEditor(offset, length) {
+      if (window.innerWidth < 1024) {
+        setViewMode('editor');
+      }
       const editor = document.getElementById('markdownEditor');
       editor.focus();
       editor.setSelectionRange(offset, offset + length);
@@ -763,7 +931,7 @@
 
       data.issues.forEach(issue => {
         const card = document.createElement('div');
-        card.className = 'p-3.5 rounded-md border border-border bg-card text-xs flex flex-col gap-2.5 shadow-sm';
+        card.className = 'p-3 sm:p-3.5 rounded-md border border-border bg-card text-xs flex flex-col gap-2.5 shadow-sm';
 
         // Extract the exact word/phrase flagged
         const flaggedWord = content.substring(issue.offset, issue.offset + issue.length) || '(at position)';
@@ -874,6 +1042,7 @@
     // Initialization
     window.addEventListener('DOMContentLoaded', () => {
       lucide.createIcons();
+      handleResize();
       fetchNotes().then(() => {
         if (allNotes.length > 0) {
           loadNote(allNotes[0].filename);
