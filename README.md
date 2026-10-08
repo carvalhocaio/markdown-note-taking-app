@@ -1,83 +1,106 @@
-# python-template
+# Markdown Note-taking App
 
-A minimalist, modern Python project template preconfigured with:
-- **Python 3.12+** and packaging via PEP 621 (`pyproject.toml` + `hatchling`)
-- **[uv](https://github.com/astral-sh/uv)** for fast package and virtual environment management
-- **[Ruff](https://github.com/astral-sh/ruff)** for linting and formatting (PEP 8 compliant, 88 columns)
-- **[Pyright](https://github.com/microsoft/pyright)** for static type checking
-- **[Pre-commit](https://pre-commit.com/)** git hooks for code hygiene and security
-- **[Pytest](https://pytest.org/)** test runner with smoke test
-- **[pip-audit](https://github.com/pypa/pip-audit)** for dependency vulnerability scanning
-- **Idiomatic Makefile** for development workflow automation
-- **GitHub Actions CI** matching local checks
+A RESTful API note-taking backend built with **FastAPI** and **Python 3.12+**, based on the [roadmap.sh Markdown Note-taking App](https://roadmap.sh/projects/markdown-note-taking-app) challenge.
+
+## Features
+
+- **Save notes via JSON:** Create and save notes directly passing Markdown strings.
+- **Upload markdown files:** Multipart file upload (`.md`) with automatic UTF-8 validation and safe storage.
+- **List saved notes:** Inspect all saved markdown notes with metadata (filename, size in bytes, last modified date).
+- **Retrieve raw notes:** View original markdown content.
+- **Render markdown to HTML:** Convert Markdown notes into styled HTML for direct browser viewing or JSON structured responses.
+- **Check grammar:** Integrated with the official LanguageTool API (`https://api.languagetool.org/v2/check`) with fallback mock support for offline testing. Supports checking arbitrary text or existing saved notes.
+- **Security:** Built-in path traversal protection ensuring files cannot escape the designated storage directory.
 
 ---
 
-## Quickstart
+## Getting Started
 
-### 1. Using this template
+### Prerequisites
 
-Click **"Use this template"** on GitHub or clone the repository:
+- [uv](https://github.com/astral-sh/uv) (package and virtual environment manager)
+- Python 3.12+
 
-```bash
-git clone https://github.com/<username>/<repo-name>.git
-cd <repo-name>
-```
-
-### 2. Rename the project
-
-Run the renaming helper to configure your package name and update `pyproject.toml` and tests:
-
-```bash
-make rename NAME=my-new-project
-```
-
-### 3. Install dependencies and git hooks
+### Installation
 
 ```bash
 make sync
-make hooks
 ```
 
----
+### Running the Development Server
 
-## Available Commands
+```bash
+uv run uvicorn markdown_note_taking_app.main:app --reload
+```
 
-| Command | Description |
-|---|---|
-| `make help` | Show all available commands |
-| `make sync` | Install runtime and dev dependencies using `uv` |
-| `make hooks` | Install pre-commit hooks into `.git/hooks` |
-| `make hooks-run` | Run pre-commit checks on all files |
-| `make test` | Run tests with `pytest` |
-| `make lint` | Check code with `ruff` |
-| `make lint-fix` | Automatically fix linting issues |
-| `make format` | Format code with `ruff` |
-| `make format-check` | Check code formatting without modifying |
-| `make typecheck` | Run static type checking with `pyright` |
-| `make audit` | Audit dependencies for vulnerabilities with `pip-audit` |
-| `make ci` | Run full verification pipeline locally (`lint`, `format-check`, `typecheck`, `audit`, `test`) |
-| `make clean` | Remove caches and build artifacts |
-| `make rename NAME=...` | Rename package and update configuration |
+Interactive OpenAPI documentation is available at:
+- **Swagger UI:** http://127.0.0.1:8000/docs
+- **ReDoc:** http://127.0.0.1:8000/redoc
 
 ---
 
-## Project Structure
+## API Endpoints
 
-```text
-.
-├── .github/workflows/ci.yml   # GitHub Actions CI workflow
-├── src/
-│   └── app_name/              # Source code directory (renamed via make rename)
-│       ├── __init__.py
-│       └── py.typed
-├── tests/
-│   ├── __init__.py
-│   └── test_smoke.py          # Initial smoke test
-├── .gitignore
-├── .pre-commit-config.yaml
-├── .python-version
-├── Makefile
-├── pyproject.toml
-└── README.md
+### 1. Save Note (JSON)
+
+```bash
+curl -X POST http://127.0.0.1:8000/notes \
+  -H "Content-Type: application/json" \
+  -d '{"filename": "my-note", "content": "# My Note\n\nThis is a markdown note."}'
+```
+
+### 2. Upload Note (.md file)
+
+```bash
+curl -X POST http://127.0.0.1:8000/notes/upload \
+  -F "file=@/path/to/sample.md"
+```
+
+### 3. List Saved Notes
+
+```bash
+curl http://127.0.0.1:8000/notes
+```
+
+### 4. Get Note Details
+
+```bash
+curl http://127.0.0.1:8000/notes/my-note.md
+```
+
+### 5. Render Note in HTML
+
+- **View in browser (HTML):**
+  ```bash
+  curl http://127.0.0.1:8000/notes/my-note.md/render
+  ```
+- **As JSON payload:**
+  ```bash
+  curl http://127.0.0.1:8000/notes/my-note.md/render?format=json
+  ```
+
+### 6. Grammar Checking
+
+- **Check arbitrary text:**
+  ```bash
+  curl -X POST http://127.0.0.1:8000/grammar/check \
+    -H "Content-Type: application/json" \
+    -d '{"text": "This is teh test text.", "language": "en-US"}'
+  ```
+
+- **Check saved note:**
+  ```bash
+  curl -X POST "http://127.0.0.1:8000/notes/my-note.md/grammar-check?language=en-US"
+  ```
+
+---
+
+## Quality and Verification
+
+```bash
+make ci        # Run full pipeline: lint, format-check, typecheck, audit, test
+make test      # Run pytest test suite
+make lint      # Check code with ruff
+make format    # Format code with ruff
+make typecheck # Run Pyright static type checking
 ```

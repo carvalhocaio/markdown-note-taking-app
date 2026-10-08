@@ -26,6 +26,9 @@ htmlcov/
 # Database
 *.sqlite3
 
+# Runtime storage
+storage/
+
 # IDE / Editor files
 .idea/
 .vscode/
