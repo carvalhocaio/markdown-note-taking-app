@@ -1,10 +1,13 @@
 [project]
 name = "markdown_note_taking_app"
 version = "0.1.0"
-description = "Starter template for modern Python projects"
+description = "A REST API for taking and managing Markdown notes"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "fastapi",
+    "uvicorn",
+]
 
 [build-system]
 requires = ["hatchling"]
@@ -19,7 +22,7 @@ dev = [
     "pre-commit>=4.0.0",
     "pyright>=1.1.390",
     "pytest>=8.4.0",
-    "ruff>=0.15.0",
+    "ruff==0.16.10",
 ]
 
 [tool.ruff]
