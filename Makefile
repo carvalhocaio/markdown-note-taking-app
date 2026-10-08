@@ -1,4 +1,4 @@
-.PHONY: help sync install hooks hooks-run test lint lint-fix format format-check typecheck audit ci check clean
+.PHONY: help sync install hooks hooks-run test lint lint-fix format format-check typecheck audit ci check clean seed
 
 help: ## Lists all available Makefile commands
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-16s\033[0m %s\n", $$1, $$2}'
@@ -38,6 +38,9 @@ audit: ## Audits dependencies for known security vulnerabilities
 ci: lint format-check typecheck audit test ## Runs full verification pipeline locally
 
 check: ci ## Alias for ci
+
+seed: ## Seeds sample markdown notes using Faker (e.g. make seed COUNT=5)
+	uv run python -m markdown_note_taking_app.seed $(if $(COUNT),--count $(COUNT),)
 
 clean: ## Cleans build artifacts and caches
 	rm -rf .ruff_cache .pytest_cache dist build *.egg-info .coverage htmlcov

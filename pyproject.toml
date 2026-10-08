@@ -23,6 +23,7 @@ packages = ["src/markdown_note_taking_app"]
 
 [dependency-groups]
 dev = [
+    "faker>=40.41.0",
     "pip-audit>=2.10.0",
     "pre-commit>=4.0.0",
     "pyright>=1.1.390",

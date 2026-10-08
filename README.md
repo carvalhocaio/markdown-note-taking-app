@@ -33,6 +33,15 @@ make sync
 uv run uvicorn markdown_note_taking_app.main:app --reload
 ```
 
+### Seeding Sample Notes
+
+Generate realistic sample Markdown notes using **Faker**:
+
+```bash
+make seed            # Generates 5 sample notes
+make seed COUNT=10   # Generates 10 sample notes
+```
+
 Interactive OpenAPI documentation is available at:
 - **Swagger UI:** http://127.0.0.1:8000/docs
 - **ReDoc:** http://127.0.0.1:8000/redoc
