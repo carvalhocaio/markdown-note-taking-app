@@ -1,4 +1,4 @@
-.PHONY: help sync install hooks hooks-run test lint lint-fix format format-check typecheck audit ci check clean seed
+.PHONY: help sync install hooks hooks-run test lint lint-fix format format-check typecheck audit ci check clean seed dev run
 
 help: ## Lists all available Makefile commands
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-16s\033[0m %s\n", $$1, $$2}'
@@ -7,6 +7,11 @@ sync: ## Installs runtime and dev dependencies using uv
 	uv sync
 
 install: sync ## Alias for sync
+
+dev: ## Starts the development server with live reload
+	uv run uvicorn markdown_note_taking_app.main:app --reload
+
+run: dev ## Alias for dev
 
 hooks: ## Installs the pre-commit hooks into .git/hooks
 	uv run pre-commit install

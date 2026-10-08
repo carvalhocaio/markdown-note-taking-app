@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Markdown Notes</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.ico">
+
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Marked.js for fast client-side preview -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            border: 'hsl(var(--border))',
+            input: 'hsl(var(--input))',
+            ring: 'hsl(var(--ring))',
+            background: 'hsl(var(--background))',
+            foreground: 'hsl(var(--foreground))',
+            primary: {
+              DEFAULT: 'hsl(var(--primary))',
+              foreground: 'hsl(var(--primary-foreground))',
+            },
+            secondary: {
+              DEFAULT: 'hsl(var(--secondary))',
+              foreground: 'hsl(var(--secondary-foreground))',
+            },
+            destructive: {
+              DEFAULT: 'hsl(var(--destructive))',
+              foreground: 'hsl(var(--destructive-foreground))',
+            },
+            muted: {
+              DEFAULT: 'hsl(var(--muted))',
+              foreground: 'hsl(var(--muted-foreground))',
+            },
+            accent: {
+              DEFAULT: 'hsl(var(--accent))',
+              foreground: 'hsl(var(--accent-foreground))',
+            },
+            card: {
+              DEFAULT: 'hsl(var(--card))',
+              foreground: 'hsl(var(--card-foreground))',
+            },
+          },
+          borderRadius: {
+            lg: 'var(--radius)',
+            md: 'calc(var(--radius) - 2px)',
+            sm: 'calc(var(--radius) - 4px)',
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    /* Shadcn Theme: Zinc + Sky (#0284c7 / #0ea5e9) */
+    :root {
+      --background: 0 0% 100%;
+      --foreground: 240 10% 3.9%;
+      --card: 0 0% 100%;
+      --card-foreground: 240 10% 3.9%;
+      --popover: 0 0% 100%;
+      --popover-foreground: 240 10% 3.9%;
+      --primary: 199 89% 48%; /* Sky Blue #0284c7 */
+      --primary-foreground: 0 0% 100%;
+      --secondary: 240 4.8% 95.9%;
+      --secondary-foreground: 240 5.9% 10%;
+      --muted: 240 4.8% 95.9%;
+      --muted-foreground: 240 3.8% 46.1%;
+      --accent: 199 89% 48% / 0.1;
+      --accent-foreground: 199 89% 40%;
+      --destructive: 0 84.2% 60.2%;
+      --destructive-foreground: 0 0% 98%;
+      --border: 240 5.9% 90%;
+      --input: 240 5.9% 90%;
+      --ring: 199 89% 48%;
+      --radius: 0.5rem;
+    }
+
+    .dark {
+      --background: 240 10% 3.9%; /* Deep Zinc #09090b */
+      --foreground: 0 0% 98%; /* #fafafa */
+      --card: 240 6% 8%; /* Dark Zinc Card #131316 */
+      --card-foreground: 0 0% 98%;
+      --popover: 240 6% 8%;
+      --popover-foreground: 0 0% 98%;
+      --primary: 199 89% 48%; /* Sky Blue #0ea5e9 / #0284c7 */
+      --primary-foreground: 0 0% 100%;
+      --secondary: 240 4% 16%; /* #27272a */
+      --secondary-foreground: 0 0% 98%;
+      --muted: 240 4% 13%; /* #1e1e23 */
+      --muted-foreground: 240 5% 64.9%; /* #a1a1aa */
+      --accent: 199 89% 48% / 0.15; /* Subtle Sky tint */
+      --accent-foreground: 199 89% 65%; /* Sky text */
+      --destructive: 0 62.8% 40%;
+      --destructive-foreground: 0 0% 98%;
+      --border: 240 4% 16%; /* #27272a */
+      --input: 240 4% 16%;
+      --ring: 199 89% 48%;
+    }
+
+    /* Shadcn Typography for rendered markdown */
+    .prose-shadcn h1 {
+      font-size: 1.875rem;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      margin-bottom: 1rem;
+      border-bottom: 1px solid hsl(var(--border));
+      padding-bottom: 0.5rem;
+      color: hsl(var(--foreground));
+    }
+    .prose-shadcn h2 {
+      font-size: 1.35rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin-top: 1.75rem;
+      margin-bottom: 0.75rem;
+      border-bottom: 1px solid hsl(var(--border) / 0.5);
+      padding-bottom: 0.35rem;
+      color: hsl(var(--foreground));
+    }
+    .prose-shadcn h3 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      letter-spacing: -0.015em;
+      margin-top: 1.25rem;
+      margin-bottom: 0.5rem;
+      color: hsl(var(--foreground));
+    }
+    .prose-shadcn p {
+      margin-bottom: 1rem;
+      line-height: 1.7;
+      color: hsl(var(--foreground) / 0.9);
+    }
+    .prose-shadcn ul {
+      list-style-type: disc;
+      padding-left: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .prose-shadcn ol {
+      list-style-type: decimal;
+      padding-left: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .prose-shadcn li {
+      margin-bottom: 0.35rem;
+      line-height: 1.6;
+    }
+    .prose-shadcn code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85em;
+      background-color: hsl(var(--muted));
+      color: hsl(var(--primary));
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      border: 1px solid hsl(var(--border));
+    }
+    .prose-shadcn pre {
+      background-color: hsl(var(--muted));
+      border: 1px solid hsl(var(--border));
+      border-radius: var(--radius);
+      padding: 1rem;
+      overflow-x: auto;
+      margin: 1.25rem 0;
+    }
+    .prose-shadcn pre code {
+      background-color: transparent;
+      border: none;
+      padding: 0;
+      font-size: 0.875rem;
+      color: hsl(var(--foreground));
+    }
+    .prose-shadcn blockquote {
+      border-left: 3px solid hsl(var(--primary));
+      padding-left: 1rem;
+      font-style: italic;
+      color: hsl(var(--muted-foreground));
+      margin: 1.25rem 0;
+    }
+    .prose-shadcn a {
+      color: hsl(var(--primary));
+      text-decoration: underline;
+      text-underline-offset: 4px;
+    }
+    .prose-shadcn hr {
+      border: none;
+      border-top: 1px solid hsl(var(--border));
+      margin: 2rem 0;
+    }
+  </style>
+</head>
+<body class="bg-background text-foreground font-sans antialiased min-h-screen flex flex-col selection:bg-primary/20 selection:text-primary">
+
+  <!-- Header / Navigation Bar -->
+  <header class="sticky top-0 z-40 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <div class="flex h-14 items-center justify-between px-4 sm:px-6">
+      <!-- Brand & Title -->
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2 font-semibold tracking-tight text-foreground">
+          <div class="h-7 w-7 rounded-md bg-primary text-primary-foreground flex items-center justify-center font-bold text-xs shadow-sm shadow-primary/20">
+            MD
+          </div>
+          <span class="text-sm font-semibold">Markdown Notes</span>
+        </div>
+        <span class="hidden sm:inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary">
+          shadcn · sky
+        </span>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex items-center gap-2">
+        <!-- New Note -->
+        <button
+          onclick="createNewNote()"
+          class="inline-flex items-center justify-center gap-1.5 rounded-md text-xs font-medium transition-colors bg-primary text-primary-foreground shadow-sm shadow-primary/25 hover:bg-primary/90 h-8 px-3"
+        >
+          <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+          <span>New Note</span>
+        </button>
+
+        <!-- Upload File -->
+        <button
+          onclick="openUploadDialog()"
+          class="inline-flex items-center justify-center gap-1.5 rounded-md text-xs font-medium transition-colors border border-input bg-card shadow-sm hover:bg-muted hover:border-primary/40 h-8 px-3"
+        >
+          <i data-lucide="upload" class="w-3.5 h-3.5 text-primary"></i>
+          <span class="hidden sm:inline">Upload .md</span>
+        </button>
+
+        <!-- Theme Toggle -->
+        <button
+          onclick="toggleTheme()"
+          class="inline-flex items-center justify-center rounded-md text-xs font-medium transition-colors border border-input bg-card shadow-sm hover:bg-muted h-8 w-8"
+          title="Toggle Theme (Light / Dark)"
+        >
+          <i id="themeIcon" data-lucide="moon" class="w-4 h-4"></i>
+        </button>
+
+        <!-- Swagger Docs -->
+        <a
+          href="/docs"
+          target="_blank"
+          class="inline-flex items-center justify-center rounded-md text-xs font-medium transition-colors border border-input bg-card shadow-sm hover:bg-muted h-8 w-8"
+          title="API Documentation (Swagger UI)"
+        >
+          <i data-lucide="book-open" class="w-4 h-4 text-muted-foreground"></i>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Layout -->
+  <div class="flex-1 flex overflow-hidden">
+    <!-- Sidebar: Notes Explorer -->
+    <aside class="w-72 sm:w-80 border-r border-border bg-card flex flex-col shrink-0">
+      <!-- Search Bar -->
+      <div class="p-3 border-b border-border flex items-center gap-2">
+        <div class="relative flex-1">
+          <i data-lucide="search" class="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-muted-foreground"></i>
+          <input
+            id="searchInput"
+            type="text"
+            placeholder="Search notes..."
+            oninput="filterNotes()"
+            class="h-8 w-full rounded-md border border-input bg-background px-8 text-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          />
+        </div>
+        <button
+          onclick="fetchNotes()"
+          class="inline-flex items-center justify-center rounded-md border border-input bg-background h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+          title="Refresh notes list"
+        >
+          <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i>
+        </button>
+      </div>
+
+      <!-- Notes List -->
+      <div id="notesList" class="flex-1 overflow-y-auto p-2 space-y-1">
+        <div class="p-4 text-center text-xs text-muted-foreground">Loading notes...</div>
+      </div>
+
+      <!-- Sidebar Footer -->
+      <div class="p-3 border-t border-border bg-muted/30 text-xs text-muted-foreground flex items-center justify-between">
+        <span id="notesCount">0 note(s) saved</span>
+        <button
+          onclick="seedNotes()"
+          class="inline-flex items-center gap-1 text-[11px] font-medium text-primary hover:underline"
+          title="Generate sample notes using Faker"
+        >
+          <i data-lucide="sparkles" class="w-3 h-3 text-primary"></i>
+          Seed Faker
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Workspace -->
+    <main class="flex-1 flex flex-col min-w-0 bg-background overflow-hidden">
+      <!-- Workspace Toolbar -->
+      <div class="h-12 border-b border-border bg-card px-4 flex items-center justify-between gap-3">
+        <!-- Filename Input -->
+        <div class="flex items-center gap-2 flex-1 max-w-md">
+          <i data-lucide="file" class="w-4 h-4 text-primary shrink-0"></i>
+          <input
+            id="noteFilename"
+            type="text"
+            placeholder="note-title.md"
+            class="h-8 w-full rounded-md border border-input bg-background px-2.5 font-mono text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          />
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex items-center gap-2">
+          <!-- Check Grammar -->
+          <button
+            id="btnCheckGrammar"
+            onclick="checkGrammar()"
+            class="inline-flex items-center justify-center gap-1.5 rounded-md text-xs font-medium transition-colors border border-input bg-background shadow-sm hover:bg-muted hover:border-primary/50 hover:text-primary h-8 px-3"
+          >
+            <i data-lucide="spell-check" class="w-3.5 h-3.5 text-primary"></i>
+            <span>Check Grammar</span>
+          </button>
+
+          <!-- Save Note -->
+          <button
+            onclick="saveCurrentNote()"
+            class="inline-flex items-center justify-center gap-1.5 rounded-md text-xs font-medium transition-colors bg-primary text-primary-foreground shadow-sm shadow-primary/25 hover:bg-primary/90 h-8 px-3"
+          >
+            <i data-lucide="save" class="w-3.5 h-3.5"></i>
+            <span>Save Note</span>
+          </button>
+
+          <!-- Open Server Rendered HTML in New Tab -->
+          <button
+            id="btnOpenHtml"
+            onclick="openRenderedHtml()"
+            class="inline-flex items-center justify-center rounded-md border border-input bg-background h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+            title="Open rendered HTML page (/render)"
+          >
+            <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Split View Editor & Preview -->
+      <div class="flex-1 flex flex-col lg:flex-row overflow-hidden">
+        <!-- Markdown Editor -->
+        <div class="flex-1 flex flex-col border-b lg:border-b-0 lg:border-r border-border bg-card">
+          <div class="h-8 px-4 border-b border-border bg-muted/20 flex items-center justify-between text-[11px] font-medium text-muted-foreground">
+            <span class="uppercase tracking-wider">Editor</span>
+            <span id="statsLabel">0 characters · 0 words</span>
+          </div>
+          <textarea
+            id="markdownEditor"
+            oninput="onEditorInput()"
+            placeholder="# Type your Markdown content here..."
+            class="flex-1 w-full p-4 bg-transparent text-foreground font-mono text-xs leading-relaxed resize-none focus:outline-none"
+            spellcheck="false"
+          ></textarea>
+        </div>
+
+        <!-- Rendered HTML Preview -->
+        <div class="flex-1 flex flex-col bg-background overflow-hidden">
+          <div class="h-8 px-4 border-b border-border bg-muted/20 flex items-center justify-between text-[11px] font-medium text-muted-foreground">
+            <span class="uppercase tracking-wider">Rendered Preview</span>
+            <span class="inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
+              HTML
+            </span>
+          </div>
+          <div id="previewContainer" class="flex-1 p-6 overflow-y-auto prose-shadcn">
+            <div class="text-xs text-muted-foreground italic">Rendered preview will appear here...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Grammar Results Floating Sheet/Banner -->
+      <div id="grammarPanel" class="hidden border-t border-border bg-card p-4 max-h-64 overflow-y-auto shadow-md">
+        <div class="flex items-center justify-between pb-2 mb-2 border-b border-border">
+          <div class="flex items-center gap-2">
+            <i data-lucide="alert-circle" class="w-4 h-4 text-sky-400"></i>
+            <span id="grammarSummary" class="text-xs font-semibold">Grammar & Spelling Analysis</span>
+          </div>
+          <button
+            onclick="closeGrammarPanel()"
+            class="h-6 w-6 rounded-md hover:bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground text-xs"
+          >
+            ✕
+          </button>
+        </div>
+        <div id="grammarIssuesList" class="space-y-3"></div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Upload Modal Dialog -->
+  <div id="uploadDialog" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    <div class="w-full max-w-md rounded-lg border border-border bg-card p-6 shadow-xl animate-in fade-in zoom-in-95 duration-150">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-sm font-semibold tracking-tight text-foreground flex items-center gap-2">
+          <i data-lucide="upload" class="w-4 h-4 text-primary"></i>
+          Upload Markdown File
+        </h3>
+        <button onclick="closeUploadDialog()" class="text-muted-foreground hover:text-foreground text-xs">✕</button>
+      </div>
+
+      <form id="uploadForm" onsubmit="handleUploadSubmit(event)" class="space-y-4">
+        <div class="space-y-1.5">
+          <label class="text-xs font-medium text-muted-foreground">Select a .md file</label>
+          <input
+            id="fileInput"
+            type="file"
+            accept=".md"
+            required
+            class="h-9 w-full rounded-md border border-input bg-background px-3 py-1.5 text-xs text-foreground file:border-0 file:bg-transparent file:text-xs file:font-medium file:text-foreground"
+          />
+        </div>
+
+        <div class="flex justify-end gap-2 pt-2">
+          <button
+            type="button"
+            onclick="closeUploadDialog()"
+            class="inline-flex items-center justify-center rounded-md text-xs font-medium border border-input bg-background hover:bg-muted hover:text-foreground h-8 px-3"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            class="inline-flex items-center justify-center rounded-md text-xs font-medium bg-primary text-primary-foreground shadow-sm shadow-primary/25 hover:bg-primary/90 h-8 px-3"
+          >
+            Upload File
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Sonner-style Toast Container -->
+  <div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-sm"></div>
+
+  <script>
+    let allNotes = [];
+    let activeNote = null;
+
+    // Theme Management (Dark / Light)
+    function setTheme(theme) {
+      if (theme === 'dark') {
+        document.documentElement.classList.add('dark');
+        document.getElementById('themeIcon')?.setAttribute('data-lucide', 'sun');
+      } else {
+        document.documentElement.classList.remove('dark');
+        document.getElementById('themeIcon')?.setAttribute('data-lucide', 'moon');
+      }
+      localStorage.setItem('notes_theme', theme);
+      lucide.createIcons();
+    }
+
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.contains('dark');
+      setTheme(isDark ? 'light' : 'dark');
+    }
+
+    const initialTheme = localStorage.getItem('notes_theme') || 'dark';
+    setTheme(initialTheme);
+
+    // Toast Notifications (Shadcn Sonner Style)
+    function showToast(message, type = 'info') {
+      const toast = document.createElement('div');
+      const isError = type === 'error';
+      const isSuccess = type === 'success';
+
+      toast.className = `flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2.5 text-xs shadow-md transition-all duration-200 ${
+        isError ? 'text-destructive border-destructive/30' : isSuccess ? 'text-sky-400 border-primary/30' : 'text-foreground'
+      }`;
+
+      const icon = isError ? 'alert-triangle' : isSuccess ? 'check' : 'info';
+      toast.innerHTML = `
+        <i data-lucide="${icon}" class="w-3.5 h-3.5 shrink-0 ${isSuccess ? 'text-primary' : ''}"></i>
+        <span class="text-foreground">${message}</span>
+      `;
+
+      const container = document.getElementById('toastContainer');
+      container.appendChild(toast);
+      lucide.createIcons();
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 200);
+      }, 3500);
+    }
+
+    // Modal Handlers
+    function openUploadDialog() {
+      document.getElementById('uploadDialog').classList.remove('hidden');
+    }
+    function closeUploadDialog() {
+      document.getElementById('uploadDialog').classList.add('hidden');
+    }
+
+    // Fetch and Render Notes
+    async function fetchNotes() {
+      try {
+        const res = await fetch('/notes');
+        if (!res.ok) throw new Error('Failed to load notes');
+        const data = await res.json();
+        allNotes = data.notes || [];
+        renderNotesList(allNotes);
+        document.getElementById('notesCount').innerText = `${data.total} note(s) saved`;
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    function renderNotesList(notes) {
+      const container = document.getElementById('notesList');
+      container.innerHTML = '';
+
+      if (notes.length === 0) {
+        container.innerHTML = `<div class="p-4 text-center text-xs text-muted-foreground">No notes found. Create or upload a note!</div>`;
+        return;
+      }
+
+      notes.forEach(note => {
+        const item = document.createElement('div');
+        const isActive = activeNote && activeNote.filename === note.filename;
+
+        item.className = `p-2.5 rounded-md cursor-pointer text-xs transition-colors border ${
+          isActive
+            ? 'bg-primary/10 text-foreground border-primary/40 font-medium shadow-sm'
+            : 'hover:bg-muted/60 border-transparent text-foreground'
+        }`;
+
+        const date = new Date(note.modified_at).toLocaleDateString('en-US', {
+          month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+        });
+
+        item.onclick = () => loadNote(note.filename);
+        item.innerHTML = `
+          <div class="flex items-center justify-between mb-1">
+            <span class="truncate font-mono font-medium max-w-[170px] ${isActive ? 'text-primary' : ''}" title="${note.filename}">
+              ${note.filename}
+            </span>
+            <span class="rounded border border-border px-1.5 py-0.5 text-[10px] text-muted-foreground font-mono">
+              ${(note.size_bytes / 1024).toFixed(1)} KB
+            </span>
+          </div>
+          <div class="text-[10px] text-muted-foreground">
+            ${date}
+          </div>
+        `;
+        container.appendChild(item);
+      });
+      lucide.createIcons();
+    }
+
+    function filterNotes() {
+      const query = document.getElementById('searchInput').value.toLowerCase();
+      const filtered = allNotes.filter(n => n.filename.toLowerCase().includes(query));
+      renderNotesList(filtered);
+    }
+
+    // Load note content
+    async function loadNote(filename) {
+      try {
+        const res = await fetch(`/notes/${encodeURIComponent(filename)}`);
+        if (!res.ok) throw new Error('Could not read note');
+        const data = await res.json();
+        activeNote = data;
+        document.getElementById('noteFilename').value = data.filename;
+        document.getElementById('markdownEditor').value = data.content;
+        onEditorInput();
+        renderNotesList(allNotes);
+        closeGrammarPanel();
+        showToast(`Note "${filename}" loaded`, 'info');
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    // Create New Note
+    function createNewNote() {
+      activeNote = null;
+      document.getElementById('noteFilename').value = 'new-note.md';
+      document.getElementById('markdownEditor').value = '# New Note\n\nStart typing your markdown content here...';
+      onEditorInput();
+      renderNotesList(allNotes);
+      closeGrammarPanel();
+      document.getElementById('markdownEditor').focus();
+    }
+
+    // Save Note
+    async function saveCurrentNote() {
+      let filename = document.getElementById('noteFilename').value.trim();
+      const content = document.getElementById('markdownEditor').value;
+
+      if (!filename) {
+        showToast('Please enter a filename', 'error');
+        return;
+      }
+      if (!filename.endsWith('.md')) {
+        filename = filename + '.md';
+        document.getElementById('noteFilename').value = filename;
+      }
+
+      try {
+        const res = await fetch('/notes', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ filename, content })
+        });
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.detail || 'Failed to save note');
+        }
+        const saved = await res.json();
+        activeNote = saved;
+        showToast(`Note "${saved.filename}" saved successfully`, 'success');
+        await fetchNotes();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    // Upload Handler
+    async function handleUploadSubmit(event) {
+      event.preventDefault();
+      const fileInput = document.getElementById('fileInput');
+      if (!fileInput.files.length) return;
+
+      const formData = new FormData();
+      formData.append('file', fileInput.files[0]);
+
+      try {
+        const res = await fetch('/notes/upload', {
+          method: 'POST',
+          body: formData
+        });
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.detail || 'Upload failed');
+        }
+        const data = await res.json();
+        closeUploadDialog();
+        fileInput.value = '';
+        showToast(`Upload completed: ${data.filename}`, 'success');
+        await fetchNotes();
+        await loadNote(data.filename);
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    // Editor Input & Live Preview
+    function onEditorInput() {
+      const content = document.getElementById('markdownEditor').value;
+      const preview = document.getElementById('previewContainer');
+      preview.innerHTML = marked.parse(content);
+
+      const charCount = content.length;
+      const wordCount = content.trim() ? content.trim().split(/\s+/).length : 0;
+      document.getElementById('statsLabel').innerText = `${charCount} characters · ${wordCount} words`;
+    }
+
+    // Open Rendered HTML in New Tab
+    function openRenderedHtml() {
+      const filename = document.getElementById('noteFilename').value.trim();
+      if (!filename) {
+        showToast('No note selected', 'error');
+        return;
+      }
+      window.open(`/notes/${encodeURIComponent(filename)}/render`, '_blank');
+    }
+
+    // Grammar Checking
+    async function checkGrammar() {
+      const content = document.getElementById('markdownEditor').value;
+      if (!content.trim()) {
+        showToast('Note content is empty', 'error');
+        return;
+      }
+
+      const btn = document.getElementById('btnCheckGrammar');
+      btn.disabled = true;
+      btn.innerHTML = `<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i><span>Checking...</span>`;
+      lucide.createIcons();
+
+      try {
+        const res = await fetch('/grammar/check', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: content, language: 'en-US' })
+        });
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.detail || 'Failed to check grammar');
+        }
+        const data = await res.json();
+        displayGrammarResults(data);
+      } catch (err) {
+        showToast(`Grammar check error: ${err.message}`, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<i data-lucide="spell-check" class="w-3.5 h-3.5 text-primary"></i><span>Check Grammar</span>`;
+        lucide.createIcons();
+      }
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function locateInEditor(offset, length) {
+      const editor = document.getElementById('markdownEditor');
+      editor.focus();
+      editor.setSelectionRange(offset, offset + length);
+
+      const textBefore = editor.value.substring(0, offset);
+      const linesBefore = textBefore.split('\n').length;
+      const lineHeight = 20;
+      editor.scrollTop = Math.max(0, (linesBefore - 3) * lineHeight);
+      showToast('Word highlighted in editor', 'info');
+    }
+
+    function displayGrammarResults(data) {
+      const panel = document.getElementById('grammarPanel');
+      const list = document.getElementById('grammarIssuesList');
+      const summary = document.getElementById('grammarSummary');
+      const editor = document.getElementById('markdownEditor');
+      const content = editor.value;
+
+      list.innerHTML = '';
+      panel.classList.remove('hidden');
+
+      if (data.issue_count === 0) {
+        summary.innerHTML = `<span class="text-sky-400 font-medium">No grammar or spelling issues found!</span>`;
+        list.innerHTML = `<div class="text-xs text-muted-foreground">The text follows ${data.language} rules cleanly.</div>`;
+        return;
+      }
+
+      summary.innerText = `${data.issue_count} issue(s) detected (${data.language}):`;
+
+      data.issues.forEach(issue => {
+        const card = document.createElement('div');
+        card.className = 'p-3.5 rounded-md border border-border bg-card text-xs flex flex-col gap-2.5 shadow-sm';
+
+        // Extract the exact word/phrase flagged
+        const flaggedWord = content.substring(issue.offset, issue.offset + issue.length) || '(at position)';
+
+        // Extract surrounding context snippet
+        const ctxStart = Math.max(0, issue.offset - 35);
+        const ctxEnd = Math.min(content.length, issue.offset + issue.length + 35);
+        const ctxBefore = content.substring(ctxStart, issue.offset);
+        const ctxTarget = flaggedWord;
+        const ctxAfter = content.substring(issue.offset + issue.length, ctxEnd);
+
+        // Build replacement suggestion buttons (Sky Blue styled)
+        let replacementsHtml = '';
+        if (issue.replacements && issue.replacements.length > 0) {
+          const buttons = issue.replacements.slice(0, 5).map(rep =>
+            `<button
+              type="button"
+              onclick="event.stopPropagation(); applyReplacement(${issue.offset}, ${issue.length}, '${escapeHtml(rep)}', '${escapeHtml(flaggedWord)}')"
+              class="inline-flex items-center gap-1 rounded bg-primary text-primary-foreground hover:bg-primary/90 px-2.5 py-1 text-xs font-mono font-medium shadow-sm transition-colors"
+              title="Replace '${escapeHtml(flaggedWord)}' with '${escapeHtml(rep)}'"
+            >
+              <span>${escapeHtml(rep)}</span>
+            </button>`
+          ).join(' ');
+
+          replacementsHtml = `
+            <div class="flex items-center gap-2 flex-wrap pt-1">
+              <span class="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Replace with:</span>
+              <div class="flex gap-1.5 flex-wrap">${buttons}</div>
+            </div>
+          `;
+        } else {
+          replacementsHtml = `
+            <div class="text-[11px] text-muted-foreground italic">No automatic replacement suggested.</div>
+          `;
+        }
+
+        card.innerHTML = `
+          <!-- Header with rule description and action -->
+          <div class="flex items-start justify-between gap-2">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="inline-flex items-center rounded-full border border-sky-500/30 bg-sky-500/10 px-2 py-0.5 text-[10px] font-semibold text-sky-400">
+                ${escapeHtml(issue.short_message || 'Grammar / Spelling')}
+              </span>
+              <span class="font-medium text-foreground text-xs">${escapeHtml(issue.message)}</span>
+            </div>
+            <button
+              type="button"
+              onclick="locateInEditor(${issue.offset}, ${issue.length})"
+              class="inline-flex items-center gap-1 text-[11px] text-primary hover:text-primary/80 font-medium shrink-0 hover:underline"
+              title="Highlight this word in the editor"
+            >
+              <i data-lucide="crosshair" class="w-3 h-3"></i>
+              <span>Locate</span>
+            </button>
+          </div>
+
+          <!-- Visual Comparison: Flagged word -> Replacements -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2.5 rounded-md bg-muted/40 border border-border">
+            <div class="flex items-center gap-2 font-mono text-xs">
+              <span class="text-[10px] uppercase tracking-wider text-muted-foreground font-sans font-medium">Flagged word:</span>
+              <span class="line-through text-destructive bg-destructive/15 px-2 py-0.5 rounded border border-destructive/25 font-semibold">
+                ${escapeHtml(flaggedWord)}
+              </span>
+            </div>
+            ${replacementsHtml}
+          </div>
+
+          <!-- Surrounding Context Snippet -->
+          <div class="text-[11px] font-mono text-muted-foreground bg-muted/20 px-2.5 py-1.5 rounded border border-border/40">
+            <span class="text-[10px] uppercase tracking-wider font-sans font-medium text-muted-foreground mr-1">Context:</span>
+            "...${escapeHtml(ctxBefore)}<mark class="bg-primary/20 text-sky-400 font-bold px-1.5 py-0.5 rounded border border-primary/40">${escapeHtml(ctxTarget)}</mark>${escapeHtml(ctxAfter)}..."
+          </div>
+        `;
+        list.appendChild(card);
+      });
+      lucide.createIcons();
+    }
+
+    function applyReplacement(offset, length, replacement, originalWord) {
+      const editor = document.getElementById('markdownEditor');
+      const text = editor.value;
+
+      // Replace text
+      editor.value = text.slice(0, offset) + replacement + text.slice(offset + length);
+      onEditorInput();
+
+      // Highlight replaced word in editor
+      editor.focus();
+      editor.setSelectionRange(offset, offset + replacement.length);
+
+      showToast(`Replaced "${originalWord}" with "${replacement}"`, 'success');
+
+      // Re-check grammar to update offsets
+      checkGrammar();
+    }
+
+    function closeGrammarPanel() {
+      document.getElementById('grammarPanel').classList.add('hidden');
+    }
+
+    // Seed Notes Trigger
+    async function seedNotes() {
+      showToast('Reloading notes list...', 'info');
+      await fetchNotes();
+    }
+
+    // Initialization
+    window.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      fetchNotes().then(() => {
+        if (allNotes.length > 0) {
+          loadNote(allNotes[0].filename);
+        } else {
+          createNewNote();
+        }
+      });
+    });
+  </script>
+</body>
+</html>

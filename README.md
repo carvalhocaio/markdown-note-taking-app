@@ -30,7 +30,8 @@ make sync
 ### Running the Development Server
 
 ```bash
-uv run uvicorn markdown_note_taking_app.main:app --reload
+make dev
+# or: uv run uvicorn markdown_note_taking_app.main:app --reload
 ```
 
 ### Seeding Sample Notes

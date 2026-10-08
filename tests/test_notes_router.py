@@ -36,6 +36,22 @@ def test_root_endpoint(client: TestClient) -> None:
     assert "/docs" in data["documentation"]
 
 
+def test_ui_endpoints(client: TestClient) -> None:
+    html_resp = client.get("/", headers={"accept": "text/html"})
+    assert html_resp.status_code == 200
+    assert "text/html" in html_resp.headers["content-type"]
+    assert "Markdown Notes" in html_resp.text
+
+    app_resp = client.get("/app")
+    assert app_resp.status_code == 200
+    assert "text/html" in app_resp.headers["content-type"]
+    assert "Markdown Notes" in app_resp.text
+
+    fav_resp = client.get("/favicon.ico")
+    assert fav_resp.status_code == 200
+    assert "image/svg+xml" in fav_resp.headers["content-type"]
+
+
 def test_create_note_json(client: TestClient) -> None:
     content = "# Quick Start Guide\n\nContent here."
     response = client.post(
